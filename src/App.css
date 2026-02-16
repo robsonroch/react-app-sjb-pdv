@@ -475,6 +475,32 @@
   border-top: 1px solid #e5e7eb;
 }
 
+body[data-theme="noite"] .admin-datagrid {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+body[data-theme="noite"] .admin-datagrid .MuiDataGrid-root {
+  color: #e5e7eb;
+}
+
+body[data-theme="noite"] .admin-datagrid .MuiDataGrid-columnHeaders {
+  background: #0b1220;
+  border-bottom-color: #1f2937;
+}
+
+body[data-theme="noite"] .admin-datagrid .MuiDataGrid-cell {
+  border-bottom-color: #1f2937;
+}
+
+body[data-theme="noite"] .admin-datagrid .MuiDataGrid-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body[data-theme="noite"] .admin-datagrid .MuiDataGrid-footerContainer {
+  border-top-color: #1f2937;
+}
+
 @media (max-width: 1024px) {
   .app-shell {
     max-width: 960px;
