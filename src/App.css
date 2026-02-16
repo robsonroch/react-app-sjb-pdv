@@ -1,0 +1,220 @@
+#root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f7fb;
+  color: #1f2937;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 520px;
+  padding: 2rem;
+}
+
+.auth-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 20px 50px rgba(31, 41, 55, 0.12);
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-card h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.auth-card form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-card label {
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.auth-card input {
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
+}
+
+.auth-card button {
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-card button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.auth-links {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.auth-links a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-error {
+  color: #b91c1c;
+  background: #fee2e2;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.auth-success {
+  color: #047857;
+  background: #d1fae5;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.admin-layout {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 20px 50px rgba(31, 41, 55, 0.12);
+  display: grid;
+  gap: 1.5rem;
+}
+
+.admin-header h1 {
+  margin: 0;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-tabs button {
+  background: #e5e7eb;
+  color: #111827;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+}
+
+.admin-tabs button.active {
+  background: #2563eb;
+  color: #fff;
+}
+
+.admin-content {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 50;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: min(560px, 100%);
+  display: grid;
+  gap: 1rem;
+}
+
+.modal header h2 {
+  margin: 0;
+}
+
+.modal-content {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.modal footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-grid {
+  display: grid;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow: auto;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
