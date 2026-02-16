@@ -1,11 +1,11 @@
 import type {
   AdminPermissionResponse,
-  AdminUserResponse,
+  AdminRoleResponse,
 } from "../../services/adminTypes";
 
-export type ManageUserPermissionsModalProps = {
+export type ManageRolePermissionsModalProps = {
   open: boolean;
-  user: AdminUserResponse | null;
+  role: AdminRoleResponse | null;
   permissions: AdminPermissionResponse[];
   onTogglePermission: (
     permissionId: string,
@@ -15,27 +15,27 @@ export type ManageUserPermissionsModalProps = {
   busy?: boolean;
 };
 
-export const ManageUserPermissionsModal = ({
+export const ManageRolePermissionsModal = ({
   open,
-  user,
+  role,
   permissions,
   onTogglePermission,
   onClose,
   busy = false,
-}: ManageUserPermissionsModalProps) => {
-  if (!open || !user) {
+}: ManageRolePermissionsModalProps) => {
+  if (!open || !role) {
     return null;
   }
 
   const currentPermissionIds = new Set(
-    user.permissions.map((permission) => permission.id),
+    role.permissions.map((permission) => permission.id),
   );
 
   return (
     <div className="modal-backdrop">
       <div className="modal">
         <header>
-          <h2>Permissões de {user.username}</h2>
+          <h2>Permissões da role {role.name}</h2>
         </header>
         <div className="modal-content">
           {permissions.map((permission) => {

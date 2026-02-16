@@ -1,23 +1,41 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  DataGrid,
+  type GridColDef,
+  type GridRenderCellParams,
+} from "@mui/x-data-grid";
+import { FiEdit2, FiEye, FiTrash2 } from "react-icons/fi";
 import type {
   AdminPermissionRequest,
   AdminPermissionResponse,
 } from "../../services/adminTypes";
-import type { AdminApi } from "../../services/robssoHexAdminApi";
+import type { AdminApi } from "../../services/adminApi";
 import { CreateEditPermissionModal } from "../../components/admin/CreateEditPermissionModal";
 
 export const AdminPermissionsTab = ({ api }: { api: AdminApi }) => {
   const [permissions, setPermissions] = useState<AdminPermissionResponse[]>([]);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [editingPermission, setEditingPermission] =
     useState<AdminPermissionResponse | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(10);
+  const [totalElements, setTotalElements] = useState(0);
+  const [detailPermission, setDetailPermission] =
+    useState<AdminPermissionResponse | null>(null);
 
   const loadPermissions = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.getPermissions();
-      setPermissions(data);
+      const result = await api.getPermissions({
+        page,
+        size,
+        search: search || undefined,
+      });
+      setPermissions(result.content);
+      setTotalElements(result.totalElements || 0);
     } catch (err) {
       window.alert(
         err instanceof Error ? err.message : "Erro ao carregar permissões",
@@ -25,7 +43,7 @@ export const AdminPermissionsTab = ({ api }: { api: AdminApi }) => {
     } finally {
       setLoading(false);
     }
-  }, [api]);
+  }, [api, page, size, search]);
 
   useEffect(() => {
     loadPermissions();
@@ -33,6 +51,7 @@ export const AdminPermissionsTab = ({ api }: { api: AdminApi }) => {
 
   const handleSave = async (input: AdminPermissionRequest) => {
     try {
+      setActionLoading(true);
       if (editingPermission) {
         await api.updatePermission(editingPermission.id, input);
       } else {
@@ -45,74 +64,126 @@ export const AdminPermissionsTab = ({ api }: { api: AdminApi }) => {
       window.alert(
         err instanceof Error ? err.message : "Erro ao salvar permissão",
       );
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  const handleDelete = async (permissionId: string) => {
-    if (!window.confirm("Deseja excluir esta permissão?")) {
-      return;
-    }
+  const handleDelete = useCallback(
+    async (permissionId: string) => {
+      if (!window.confirm("Deseja excluir esta permissão?")) {
+        return;
+      }
 
-    try {
-      await api.deletePermission(permissionId);
-      await loadPermissions();
-    } catch (err) {
-      window.alert(
-        err instanceof Error ? err.message : "Erro ao excluir permissão",
-      );
-    }
-  };
+      try {
+        setActionLoading(true);
+        await api.deletePermission(permissionId);
+        await loadPermissions();
+      } catch (err) {
+        window.alert(
+          err instanceof Error ? err.message : "Erro ao excluir permissão",
+        );
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [api, loadPermissions],
+  );
+
+  const columns = useMemo<GridColDef<AdminPermissionResponse>[]>(
+    () => [
+      { field: "id", headerName: "ID", flex: 1, minWidth: 140 },
+      { field: "resource", headerName: "Resource", flex: 1, minWidth: 200 },
+      { field: "action", headerName: "Action", flex: 1, minWidth: 200 },
+      {
+        field: "actions",
+        headerName: "Ações",
+        sortable: false,
+        filterable: false,
+        width: 220,
+        renderCell: (params: GridRenderCellParams<AdminPermissionResponse>) => (
+          <div className="admin-actions">
+            <button
+              onClick={() => setDetailPermission(params.row)}
+              disabled={actionLoading}
+              className="icon-button"
+            >
+              <FiEye aria-hidden />
+              Detalhar
+            </button>
+            <button
+              onClick={() => {
+                setEditingPermission(params.row);
+                setShowModal(true);
+              }}
+              disabled={actionLoading}
+              className="icon-button"
+            >
+              <FiEdit2 aria-hidden />
+              Editar
+            </button>
+            <button
+              onClick={() => handleDelete(params.row.id)}
+              disabled={actionLoading}
+              className="icon-button danger"
+            >
+              <FiTrash2 aria-hidden />
+              Excluir
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [actionLoading, handleDelete],
+  );
 
   return (
     <div className="admin-tab">
       <header className="admin-tab-header">
         <h2>Permissões</h2>
-        <button
-          onClick={() => {
-            setEditingPermission(null);
-            setShowModal(true);
-          }}
-        >
-          Nova permissão
-        </button>
+        <div className="admin-filters">
+          <input
+            placeholder="Buscar permission"
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(0);
+            }}
+          />
+          <button
+            onClick={() => {
+              setEditingPermission(null);
+              setShowModal(true);
+            }}
+          >
+            Nova permissão
+          </button>
+        </div>
       </header>
 
-      {loading ? (
-        <p>Carregando permissões...</p>
-      ) : (
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Resource</th>
-              <th>Action</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {permissions.map((permission) => (
-              <tr key={permission.id}>
-                <td>{permission.id}</td>
-                <td>{permission.resource}</td>
-                <td>{permission.action}</td>
-                <td className="admin-actions">
-                  <button
-                    onClick={() => {
-                      setEditingPermission(permission);
-                      setShowModal(true);
-                    }}
-                  >
-                    Editar
-                  </button>
-                  <button onClick={() => handleDelete(permission.id)}>
-                    Excluir
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <div className="admin-datagrid">
+        <DataGrid
+          rows={permissions}
+          columns={columns}
+          loading={loading}
+          rowCount={totalElements}
+          paginationMode="server"
+          paginationModel={{ page, pageSize: size }}
+          onPaginationModelChange={(model) => {
+            if (model.page !== page) {
+              setPage(model.page);
+            }
+            if (model.pageSize !== size) {
+              setSize(model.pageSize);
+              setPage(0);
+            }
+          }}
+          pageSizeOptions={[10, 20, 50]}
+          disableRowSelectionOnClick
+          autoHeight
+          density="compact"
+        />
+      </div>
 
       <CreateEditPermissionModal
         key={`${editingPermission?.id ?? "new"}-${showModal}`}
@@ -121,6 +192,35 @@ export const AdminPermissionsTab = ({ api }: { api: AdminApi }) => {
         onSave={handleSave}
         onClose={() => setShowModal(false)}
       />
+
+      {detailPermission && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <header>
+              <h2>Detalhes da permissão</h2>
+            </header>
+            <div className="modal-content">
+              <div className="detail-grid">
+                <div>
+                  <span className="detail-label">ID</span>
+                  <p className="detail-value">{detailPermission.id}</p>
+                </div>
+                <div>
+                  <span className="detail-label">Resource</span>
+                  <p className="detail-value">{detailPermission.resource}</p>
+                </div>
+                <div>
+                  <span className="detail-label">Action</span>
+                  <p className="detail-value">{detailPermission.action}</p>
+                </div>
+              </div>
+            </div>
+            <footer>
+              <button onClick={() => setDetailPermission(null)}>Fechar</button>
+            </footer>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

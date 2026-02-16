@@ -24,7 +24,10 @@ export type AdminApi = {
   getRoles: () => Promise<AdminRoleResponse[]>;
   getRole: (id: string) => Promise<AdminRoleResponse>;
   createRole: (input: AdminRoleRequest) => Promise<AdminRoleResponse>;
-  updateRole: (id: string, input: AdminRoleRequest) => Promise<AdminRoleResponse>;
+  updateRole: (
+    id: string,
+    input: AdminRoleRequest,
+  ) => Promise<AdminRoleResponse>;
   deleteRole: (id: string) => Promise<void>;
   addRolePermission: (roleId: string, permissionId: string) => Promise<void>;
   removeRolePermission: (roleId: string, permissionId: string) => Promise<void>;
@@ -151,7 +154,8 @@ export const createAdminApi = (options: AdminApiOptions = {}): AdminApi => {
       }),
     getPermission: async (id: string) =>
       request<AdminPermissionResponse>(`/admin/permissions/${id}`, {
-        method: "GET" }),
+        method: "GET",
+      }),
     createPermission: async (input: AdminPermissionRequest) =>
       request<AdminPermissionResponse>(`/admin/permissions`, {
         method: "POST",

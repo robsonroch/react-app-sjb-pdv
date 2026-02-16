@@ -4,6 +4,15 @@ export type AdminPermissionResponse = {
   action: string;
 };
 
+export type AdminMeResponse = {
+  id: string;
+  username: string;
+  email: string;
+  ativo: boolean;
+  roles: AdminRoleResponse[];
+  permissions: AdminPermissionResponse[];
+};
+
 export type AdminRoleResponse = {
   id: string;
   name: string;
@@ -29,4 +38,12 @@ export type AdminRoleRequest = {
 export type AdminPermissionRequest = {
   resource: string;
   action: string;
+};
+
+export type AdminPagedResponse<T> = {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 };

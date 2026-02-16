@@ -12,15 +12,46 @@ import { useAuth } from "./adapters/primary/react/auth/useAuth";
 import { AdminPage } from "./pages/admin/AdminPage";
 
 const Home = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
+
+  const hasAdminAccess =
+    hasPermission("user:read") ||
+    hasPermission("role:read") ||
+    hasPermission("role:write") ||
+    hasPermission("permission:read") ||
+    hasPermission("permission:write");
+
+  const hasSalesReport = hasPermission("report:read:sales");
 
   return (
     <section className="auth-card">
       <h1>Dashboard</h1>
       <p>Bem-vindo, {user?.username}</p>
       <nav className="auth-links">
+        {hasAdminAccess && <Link to="/admin">Administração</Link>}
+        {hasSalesReport && <Link to="/reports/sales">Relatório de vendas</Link>}
         <Link to="/password-change">Alterar senha</Link>
       </nav>
+      <div className="auth-section">
+        <h2>Permissões</h2>
+        <div className="chip-cell">
+          {(user?.permissions ?? []).map((permission) => (
+            <span key={permission.name} className="chip">
+              {permission.name}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="auth-section">
+        <h2>Roles</h2>
+        <div className="chip-cell">
+          {(user?.roles ?? []).map((role) => (
+            <span key={role.name} className="chip">
+              {role.name}
+            </span>
+          ))}
+        </div>
+      </div>
       <button onClick={logout}>Sair</button>
     </section>
   );
@@ -69,10 +100,8 @@ function App() {
         <Route path="/complete-signup" element={<CompleteSignupPage />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
-        <Route
-          element={<AdminRoute requiredRole="adm-full" requiredPermissions={[]} />}
-        >
-          <Route path="/admin" element={<AdminPage />} />
+        <Route element={<AdminRoute />}>
+          <Route path="/admin/:tab?" element={<AdminPage />} />
         </Route>
 
         <Route element={<ProtectedRoute />}>

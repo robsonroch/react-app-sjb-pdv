@@ -1,4 +1,7 @@
-import type { AdminRoleResponse, AdminUserResponse } from "../../services/adminTypes";
+import type {
+  AdminRoleResponse,
+  AdminUserResponse,
+} from "../../services/adminTypes";
 
 export type ManageUserRolesModalProps = {
   open: boolean;
@@ -6,6 +9,7 @@ export type ManageUserRolesModalProps = {
   roles: AdminRoleResponse[];
   onToggleRole: (roleId: string, shouldAdd: boolean) => Promise<void>;
   onClose: () => void;
+  busy?: boolean;
 };
 
 export const ManageUserRolesModal = ({
@@ -14,6 +18,7 @@ export const ManageUserRolesModal = ({
   roles,
   onToggleRole,
   onClose,
+  busy = false,
 }: ManageUserRolesModalProps) => {
   if (!open || !user) {
     return null;
@@ -35,6 +40,7 @@ export const ManageUserRolesModal = ({
                 <input
                   type="checkbox"
                   checked={checked}
+                  disabled={busy}
                   onChange={() => onToggleRole(role.id, !checked)}
                 />
                 <span>{role.name}</span>
@@ -43,7 +49,9 @@ export const ManageUserRolesModal = ({
           })}
         </div>
         <footer>
-          <button onClick={onClose}>Fechar</button>
+          <button onClick={onClose} disabled={busy}>
+            Fechar
+          </button>
         </footer>
       </div>
     </div>
