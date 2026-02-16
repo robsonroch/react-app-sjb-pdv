@@ -34,8 +34,13 @@ export const AdminPermissionsTab = ({ api }: { api: AdminApi }) => {
         size,
         search: search || undefined,
       });
-      setPermissions(result.content);
-      setTotalElements(result.totalElements || 0);
+      const content = Array.isArray(result) ? result : (result.content ?? []);
+      setPermissions(content);
+      setTotalElements(
+        Array.isArray(result)
+          ? result.length
+          : (result.totalElements ?? content.length),
+      );
     } catch (err) {
       window.alert(
         err instanceof Error ? err.message : "Erro ao carregar permissões",

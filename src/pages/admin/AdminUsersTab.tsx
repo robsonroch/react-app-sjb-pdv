@@ -49,8 +49,13 @@ export const AdminUsersTab = ({ api }: { api: AdminApi }) => {
           search: search || undefined,
           active: activeOnly ? true : undefined,
         });
-        setUsers(result.content);
-        setTotalElements(result.totalElements || 0);
+        const content = Array.isArray(result) ? result : (result.content ?? []);
+        setUsers(content);
+        setTotalElements(
+          Array.isArray(result)
+            ? result.length
+            : (result.totalElements ?? content.length),
+        );
         if (userIdToSync) {
           const updated =
             result.content.find((user) => user.id === userIdToSync) ?? null;

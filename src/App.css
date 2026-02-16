@@ -1,16 +1,27 @@
 #root {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   background: transparent;
   color: #1f2937;
+  padding: 2rem 0;
+  width: 100%;
 }
 
 .app-shell {
   width: 100%;
   max-width: 1200px;
   padding: 2rem;
+  margin: 0 auto;
+}
+
+.app-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.app-toolbar .MuiFormControl-root {
+  min-width: 160px;
 }
 
 .auth-card {
@@ -434,10 +445,16 @@
   border-radius: 12px;
   overflow-x: auto;
   overflow-y: hidden;
+  min-height: 320px;
 }
 
 .admin-datagrid .MuiDataGrid-root {
   border: none;
+  min-height: 320px;
+}
+
+.admin-datagrid .MuiDataGrid-virtualScroller {
+  min-height: 220px;
 }
 
 .admin-datagrid .MuiDataGrid-columnHeaders {
