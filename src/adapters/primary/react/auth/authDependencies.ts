@@ -6,6 +6,7 @@ import { HasPermission } from "../../../../application/auth/usecases/HasPermissi
 import { Login } from "../../../../application/auth/usecases/Login";
 import { Logout } from "../../../../application/auth/usecases/Logout";
 import { PreSignup } from "../../../../application/auth/usecases/PreSignup";
+import { RequestPasswordReset } from "../../../../application/auth/usecases/RequestPasswordReset";
 import { ValidatePreSignup } from "../../../../application/auth/usecases/ValidatePreSignup";
 import { ValidatePasswordChange } from "../../../../application/auth/usecases/ValidatePasswordChange";
 import { ValidatePasswordReset } from "../../../../application/auth/usecases/ValidatePasswordReset";
@@ -29,7 +30,7 @@ export const createAuthDependencies = (
   const logoutUseCase = new Logout(tokenStorage);
 
   const httpClient = new HttpClient({
-    baseUrl: import.meta.env.VITE_AUTH_BASE_URL ?? "",
+    baseUrl: "/robssohex",
     tokenStorage,
     onUnauthorized: options.onUnauthorized
       ? () => {
@@ -48,6 +49,7 @@ export const createAuthDependencies = (
     preSignupUseCase: new PreSignup(authRepository),
     validatePreSignupUseCase: new ValidatePreSignup(authRepository),
     completeSignupUseCase: new CompleteSignup(authRepository),
+    requestPasswordResetUseCase: new RequestPasswordReset(authRepository),
     validatePasswordChangeUseCase: new ValidatePasswordChange(authRepository),
     completePasswordChangeUseCase: new CompletePasswordChange(authRepository),
     validatePasswordResetUseCase: new ValidatePasswordReset(authRepository),

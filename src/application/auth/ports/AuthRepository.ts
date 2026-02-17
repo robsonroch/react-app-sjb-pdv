@@ -48,6 +48,10 @@ export type ValidatePasswordResetResult = {
   token: string;
 };
 
+export type RequestPasswordResetInput = {
+  email: string;
+};
+
 export type CompletePasswordResetInput = {
   id: string;
   token: string;
@@ -65,6 +69,7 @@ export interface AuthRepository {
     input: ValidatePreSignupInput,
   ): Promise<ValidatePreSignupResult>;
   completeSignup(input: CompleteSignupInput): Promise<void>;
+  requestPasswordReset(input: RequestPasswordResetInput): Promise<void>;
   validatePasswordChange(
     input: ValidatePasswordChangeInput,
   ): Promise<ValidatePasswordChangeResult>;

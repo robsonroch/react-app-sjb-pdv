@@ -7,6 +7,7 @@ import { AdminUsersTab } from "./AdminUsersTab";
 import { AdminRolesTab } from "./AdminRolesTab";
 import { AdminPermissionsTab } from "./AdminPermissionsTab";
 import { FiKey, FiShield, FiUsers } from "react-icons/fi";
+import { debugLog } from "../../utils/logger";
 
 const normalizeResource = (resource: string) => {
   const lower = resource.toLowerCase();
@@ -33,9 +34,14 @@ const normalizeAction = (action: string) => {
   if (
     lower.includes("write") ||
     lower.includes("create") ||
+    lower.includes("criar") ||
     lower.includes("manage") ||
     lower.includes("update") ||
-    lower.includes("delete")
+    lower.includes("atualiza") ||
+    lower.includes("editar") ||
+    lower.includes("delete") ||
+    lower.includes("excluir") ||
+    lower.includes("remover")
   ) {
     return "write";
   }
@@ -43,7 +49,9 @@ const normalizeAction = (action: string) => {
   if (
     lower.includes("read") ||
     lower.includes("list") ||
+    lower.includes("lista") ||
     lower.includes("busca") ||
+    lower.includes("buscar") ||
     lower.includes("listar")
   ) {
     return "read";
@@ -114,6 +122,7 @@ export const AdminPage = () => {
 
         setMe(profile);
         const authorities = buildAuthorities(profile);
+        debugLog("admin.me.authorities", authorities);
         const menu = buildMenu(authorities);
         if (menu.length > 0) {
           const desiredTab =
@@ -124,6 +133,7 @@ export const AdminPage = () => {
           }
         }
       } catch (err) {
+        debugLog("admin.me.error", err);
         setErrorMessage(
           err instanceof Error ? err.message : "Erro ao carregar",
         );
@@ -157,6 +167,9 @@ export const AdminPage = () => {
 
   const authorities = buildAuthorities(me);
   const menuItems = buildMenu(authorities);
+  const canWriteRoles = authorities.includes("role:write");
+  const canWritePermissions = authorities.includes("permission:write");
+  const canWriteUsers = authorities.includes("user:write");
 
   const handleSelectTab = (id: string) => {
     setActiveTab(id);
@@ -194,9 +207,18 @@ export const AdminPage = () => {
           </div>
         </header>
 
-        {activeTab === "users" && <AdminUsersTab api={api} />}
-        {activeTab === "roles" && <AdminRolesTab api={api} />}
-        {activeTab === "permissions" && <AdminPermissionsTab api={api} />}
+        {activeTab === "users" && (
+          <AdminUsersTab api={api} canWriteUsers={canWriteUsers} />
+        )}
+        {activeTab === "roles" && (
+          <AdminRolesTab api={api} canWriteRoles={canWriteRoles} />
+        )}
+        {activeTab === "permissions" && (
+          <AdminPermissionsTab
+            api={api}
+            canWritePermissions={canWritePermissions}
+          />
+        )}
       </div>
     </section>
   );

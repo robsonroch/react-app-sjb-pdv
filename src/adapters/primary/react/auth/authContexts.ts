@@ -12,6 +12,7 @@ export type AuthContextValue = {
 
 export type AuthFacade = {
   preSignup: (input: { username: string; email: string }) => Promise<void>;
+  requestPasswordReset: (input: { email: string }) => Promise<void>;
   validatePreSignup: (input: { id: string; token: string }) => Promise<{
     id: string;
     token: string;

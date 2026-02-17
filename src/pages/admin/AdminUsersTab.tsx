@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DataGrid,
+  GridActionsCellItem,
   type GridColDef,
   type GridRenderCellParams,
 } from "@mui/x-data-grid";
@@ -21,7 +22,13 @@ import type { AdminApi } from "../../services/adminApi";
 import { ManageUserRolesModal } from "../../components/admin/ManageUserRolesModal";
 import { ManageUserPermissionsModal } from "../../components/admin/ManageUserPermissionsModal";
 
-export const AdminUsersTab = ({ api }: { api: AdminApi }) => {
+export const AdminUsersTab = ({
+  api,
+  canWriteUsers,
+}: {
+  api: AdminApi;
+  canWriteUsers: boolean;
+}) => {
   const [users, setUsers] = useState<AdminUserResponse[]>([]);
   const [roles, setRoles] = useState<AdminRoleResponse[]>([]);
   const [permissions, setPermissions] = useState<AdminPermissionResponse[]>([]);
@@ -38,6 +45,11 @@ export const AdminUsersTab = ({ api }: { api: AdminApi }) => {
   const [showRolesModal, setShowRolesModal] = useState(false);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [detailUser, setDetailUser] = useState<AdminUserResponse | null>(null);
+  const [accessUser, setAccessUser] = useState<AdminUserResponse | null>(null);
+  const [showAccessModal, setShowAccessModal] = useState(false);
+  const [accessRoleIds, setAccessRoleIds] = useState<string[]>([]);
+  const [accessPermissionIds, setAccessPermissionIds] = useState<string[]>([]);
+  const [accessSaving, setAccessSaving] = useState(false);
 
   const refreshUsers = useCallback(
     async (userIdToSync?: string) => {
@@ -58,7 +70,7 @@ export const AdminUsersTab = ({ api }: { api: AdminApi }) => {
         );
         if (userIdToSync) {
           const updated =
-            result.content.find((user) => user.id === userIdToSync) ?? null;
+            content.find((user) => user.id === userIdToSync) ?? null;
           setSelectedUser(updated);
         }
       } catch (err) {
@@ -105,8 +117,31 @@ export const AdminUsersTab = ({ api }: { api: AdminApi }) => {
     setShowPermissionsModal(true);
   };
 
-  const openDetailModal = (user: AdminUserResponse) => {
-    setDetailUser(user);
+  const openDetailModal = async (user: AdminUserResponse) => {
+    try {
+      const fresh = await api.getUser(user.id);
+      setDetailUser(fresh);
+    } catch (err) {
+      window.alert(
+        err instanceof Error ? err.message : "Erro ao carregar usuário",
+      );
+    }
+  };
+
+  const openAccessModal = async (user: AdminUserResponse) => {
+    try {
+      const fresh = await api.getUser(user.id);
+      setAccessUser(fresh);
+      setAccessRoleIds(fresh.roles.map((role) => role.id));
+      setAccessPermissionIds(
+        fresh.permissions.map((permission) => permission.id),
+      );
+      setShowAccessModal(true);
+    } catch (err) {
+      window.alert(
+        err instanceof Error ? err.message : "Erro ao carregar usuário",
+      );
+    }
   };
 
   const handleToggleActive = async (user: AdminUserResponse) => {
@@ -131,7 +166,6 @@ export const AdminUsersTab = ({ api }: { api: AdminApi }) => {
     if (!selectedUser) {
       return;
     }
-
     try {
       setActionLoading(true);
       if (shouldAdd) {
@@ -171,6 +205,34 @@ export const AdminUsersTab = ({ api }: { api: AdminApi }) => {
       );
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleSaveAccess = async () => {
+    if (!accessUser) {
+      return;
+    }
+
+    try {
+      setAccessSaving(true);
+      await api.updateUserAccess({
+        id: accessUser.id,
+        roleIds: accessRoleIds,
+        permissionIds: accessPermissionIds,
+      });
+      const refreshed = await api.getUser(accessUser.id);
+      setAccessUser(refreshed);
+      setAccessRoleIds(refreshed.roles.map((role) => role.id));
+      setAccessPermissionIds(
+        refreshed.permissions.map((permission) => permission.id),
+      );
+      await refreshUsers(accessUser.id);
+    } catch (err) {
+      window.alert(
+        err instanceof Error ? err.message : "Erro ao atualizar acesso",
+      );
+    } finally {
+      setAccessSaving(false);
     }
   };
 
@@ -216,54 +278,57 @@ export const AdminUsersTab = ({ api }: { api: AdminApi }) => {
       },
       {
         field: "actions",
+        type: "actions",
         headerName: "Ações",
-        sortable: false,
-        filterable: false,
-        minWidth: 260,
-        flex: 1,
-        renderCell: (params: GridRenderCellParams<AdminUserResponse>) => (
-          <div className="admin-actions">
-            <button
+        width: canWriteUsers ? 200 : 90,
+        getActions: (params: GridRenderCellParams<AdminUserResponse>) => {
+          const base = [
+            <GridActionsCellItem
+              key="detail"
+              icon={<FiEye />}
+              label="Detalhar"
               onClick={() => openDetailModal(params.row)}
-              disabled={actionLoading}
-              className="icon-button"
-            >
-              <FiEye aria-hidden />
-              Detalhar
-            </button>
-            <button
+            />,
+          ];
+
+          if (!canWriteUsers) {
+            return base;
+          }
+
+          return [
+            ...base,
+            <GridActionsCellItem
+              key="toggle"
+              icon={params.row.ativo ? <FiUserX /> : <FiUserCheck />}
+              label={params.row.ativo ? "Desativar" : "Ativar"}
               onClick={() => handleToggleActive(params.row)}
-              disabled={actionLoading}
-              className="icon-button"
-            >
-              {params.row.ativo ? (
-                <FiUserX aria-hidden />
-              ) : (
-                <FiUserCheck aria-hidden />
-              )}
-              {params.row.ativo ? "Desativar" : "Ativar"}
-            </button>
-            <button
+            />,
+            <GridActionsCellItem
+              key="roles"
+              icon={<FiUsers />}
+              label="Roles"
               onClick={() => openRolesModal(params.row)}
-              disabled={actionLoading}
-              className="icon-button"
-            >
-              <FiUsers aria-hidden />
-              Roles
-            </button>
-            <button
+              showInMenu
+            />,
+            <GridActionsCellItem
+              key="permissions"
+              icon={<FiShield />}
+              label="Permissões"
               onClick={() => openPermissionsModal(params.row)}
-              disabled={actionLoading}
-              className="icon-button"
-            >
-              <FiShield aria-hidden />
-              Permissões
-            </button>
-          </div>
-        ),
+              showInMenu
+            />,
+            <GridActionsCellItem
+              key="access"
+              icon={<FiShield />}
+              label="Gerenciar acesso"
+              onClick={() => openAccessModal(params.row)}
+              showInMenu
+            />,
+          ];
+        },
       },
     ],
-    [actionLoading],
+    [actionLoading, canWriteUsers],
   );
 
   return (
@@ -317,23 +382,27 @@ export const AdminUsersTab = ({ api }: { api: AdminApi }) => {
         />
       </div>
 
-      <ManageUserRolesModal
-        open={showRolesModal}
-        user={selectedUser}
-        roles={roles}
-        onToggleRole={handleToggleRole}
-        onClose={() => setShowRolesModal(false)}
-        busy={actionLoading}
-      />
+      {canWriteUsers && (
+        <ManageUserRolesModal
+          open={showRolesModal}
+          user={selectedUser}
+          roles={roles}
+          onToggleRole={handleToggleRole}
+          onClose={() => setShowRolesModal(false)}
+          busy={actionLoading}
+        />
+      )}
 
-      <ManageUserPermissionsModal
-        open={showPermissionsModal}
-        user={selectedUser}
-        permissions={permissions}
-        onTogglePermission={handleTogglePermission}
-        onClose={() => setShowPermissionsModal(false)}
-        busy={actionLoading}
-      />
+      {canWriteUsers && (
+        <ManageUserPermissionsModal
+          open={showPermissionsModal}
+          user={selectedUser}
+          permissions={permissions}
+          onTogglePermission={handleTogglePermission}
+          onClose={() => setShowPermissionsModal(false)}
+          busy={actionLoading}
+        />
+      )}
 
       {detailUser && (
         <div className="modal-backdrop">
@@ -381,6 +450,88 @@ export const AdminUsersTab = ({ api }: { api: AdminApi }) => {
             </div>
             <footer>
               <button onClick={() => setDetailUser(null)}>Fechar</button>
+            </footer>
+          </div>
+        </div>
+      )}
+
+      {showAccessModal && accessUser && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <header>
+              <h2>Gerenciar acesso</h2>
+            </header>
+            <div className="modal-content">
+              <div className="detail-grid">
+                <div>
+                  <span className="detail-label">Usuário</span>
+                  <p className="detail-value">{accessUser.username}</p>
+                </div>
+                <div>
+                  <span className="detail-label">Email</span>
+                  <p className="detail-value">{accessUser.email}</p>
+                </div>
+              </div>
+              <div className="detail-section">
+                <h3>
+                  <FiUsers aria-hidden /> Roles atribuídas
+                </h3>
+                <div className="checkbox-grid">
+                  {roles.map((role) => {
+                    const checked = accessRoleIds.includes(role.id);
+                    return (
+                      <label key={role.id} className="checkbox-row">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() =>
+                            setAccessRoleIds((current) =>
+                              checked
+                                ? current.filter((id) => id !== role.id)
+                                : [...current, role.id],
+                            )
+                          }
+                        />
+                        <span>{role.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="detail-section">
+                <h3>
+                  <FiLock aria-hidden /> Permissões diretas
+                </h3>
+                <div className="checkbox-grid">
+                  {permissions.map((permission) => {
+                    const checked = accessPermissionIds.includes(permission.id);
+                    return (
+                      <label key={permission.id} className="checkbox-row">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() =>
+                            setAccessPermissionIds((current) =>
+                              checked
+                                ? current.filter((id) => id !== permission.id)
+                                : [...current, permission.id],
+                            )
+                          }
+                        />
+                        <span>
+                          {permission.resource}:{permission.action}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            <footer>
+              <button onClick={handleSaveAccess} disabled={accessSaving}>
+                {accessSaving ? "Salvando..." : "Salvar acesso"}
+              </button>
+              <button onClick={() => setShowAccessModal(false)}>Fechar</button>
             </footer>
           </div>
         </div>

@@ -17,7 +17,7 @@ export const LoginPage = () => {
 
     try {
       await login({ email, password });
-      navigate("/home", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao autenticar");
     } finally {

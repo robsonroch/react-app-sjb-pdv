@@ -86,6 +86,8 @@ export const AuthProvider = ({
     () => ({
       preSignup: (input: { username: string; email: string }) =>
         dependencies.preSignupUseCase.execute(input),
+      requestPasswordReset: (input: { email: string }) =>
+        dependencies.requestPasswordResetUseCase.execute(input),
       validatePreSignup: (input: { id: string; token: string }) =>
         dependencies.validatePreSignupUseCase.execute(input),
       validatePasswordChange: (input: { id: string; token: string }) =>

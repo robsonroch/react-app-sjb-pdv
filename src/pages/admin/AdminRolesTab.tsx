@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DataGrid,
+  GridActionsCellItem,
   type GridColDef,
   type GridRenderCellParams,
 } from "@mui/x-data-grid";
@@ -14,7 +15,13 @@ import type { AdminApi } from "../../services/adminApi";
 import { CreateEditRoleModal } from "../../components/admin/CreateEditRoleModal";
 import { ManageRolePermissionsModal } from "../../components/admin/ManageRolePermissionsModal";
 
-export const AdminRolesTab = ({ api }: { api: AdminApi }) => {
+export const AdminRolesTab = ({
+  api,
+  canWriteRoles,
+}: {
+  api: AdminApi;
+  canWriteRoles: boolean;
+}) => {
   const [roles, setRoles] = useState<AdminRoleResponse[]>([]);
   const [permissions, setPermissions] = useState<AdminPermissionResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -167,55 +174,57 @@ export const AdminRolesTab = ({ api }: { api: AdminApi }) => {
       },
       {
         field: "actions",
+        type: "actions",
         headerName: "Ações",
-        sortable: false,
-        filterable: false,
-        width: 280,
-        renderCell: (params: GridRenderCellParams<AdminRoleResponse>) => (
-          <div className="admin-actions">
-            <button
+        width: canWriteRoles ? 200 : 90,
+        getActions: (params: GridRenderCellParams<AdminRoleResponse>) => {
+          const base = [
+            <GridActionsCellItem
+              key="detail"
+              icon={<FiEye />}
+              label="Detalhar"
               onClick={() => setDetailRole(params.row)}
-              disabled={actionLoading}
-              className="icon-button"
-            >
-              <FiEye aria-hidden />
-              Detalhar
-            </button>
-            <button
+            />,
+          ];
+
+          if (!canWriteRoles) {
+            return base;
+          }
+
+          return [
+            ...base,
+            <GridActionsCellItem
+              key="edit"
+              icon={<FiEdit2 />}
+              label="Editar"
               onClick={() => {
                 setEditingRole(params.row);
                 setShowModal(true);
               }}
-              disabled={actionLoading}
-              className="icon-button"
-            >
-              <FiEdit2 aria-hidden />
-              Editar
-            </button>
-            <button
+              showInMenu
+            />,
+            <GridActionsCellItem
+              key="permissions"
+              icon={<FiShield />}
+              label="Permissões"
               onClick={() => {
                 setEditingRole(params.row);
                 setShowPermissionsModal(true);
               }}
-              disabled={actionLoading}
-              className="icon-button"
-            >
-              <FiShield aria-hidden />
-              Permissões
-            </button>
-            <button
+              showInMenu
+            />,
+            <GridActionsCellItem
+              key="delete"
+              icon={<FiTrash2 />}
+              label="Excluir"
               onClick={() => handleDelete(params.row.id)}
-              disabled={actionLoading}
-              className="icon-button danger"
-            >
-              <FiTrash2 aria-hidden />
-              Excluir
-            </button>
-          </div>
-        ),
+              showInMenu
+            />,
+          ];
+        },
       },
     ],
-    [actionLoading, handleDelete],
+    [actionLoading, canWriteRoles, handleDelete],
   );
 
   return (
@@ -231,14 +240,16 @@ export const AdminRolesTab = ({ api }: { api: AdminApi }) => {
               setPage(0);
             }}
           />
-          <button
-            onClick={() => {
-              setEditingRole(null);
-              setShowModal(true);
-            }}
-          >
-            Nova role
-          </button>
+          {canWriteRoles && (
+            <button
+              onClick={() => {
+                setEditingRole(null);
+                setShowModal(true);
+              }}
+            >
+              Nova role
+            </button>
+          )}
         </div>
       </header>
 
@@ -275,14 +286,16 @@ export const AdminRolesTab = ({ api }: { api: AdminApi }) => {
         onClose={() => setShowModal(false)}
       />
 
-      <ManageRolePermissionsModal
-        open={showPermissionsModal}
-        role={editingRole}
-        permissions={permissions}
-        onTogglePermission={handleTogglePermission}
-        onClose={() => setShowPermissionsModal(false)}
-        busy={actionLoading}
-      />
+      {canWriteRoles && (
+        <ManageRolePermissionsModal
+          open={showPermissionsModal}
+          role={editingRole}
+          permissions={permissions}
+          onTogglePermission={handleTogglePermission}
+          onClose={() => setShowPermissionsModal(false)}
+          busy={actionLoading}
+        />
+      )}
 
       {detailRole && (
         <div className="modal-backdrop">

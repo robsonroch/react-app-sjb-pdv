@@ -13,7 +13,7 @@ export const ProtectedRoute = ({
   }
 
   if (requiredPermission && !hasPermission(requiredPermission)) {
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <Outlet />;

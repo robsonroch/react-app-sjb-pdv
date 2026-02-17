@@ -88,6 +88,28 @@
 .theme-slider {
   min-width: 200px;
 }
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+}
+
+.app-nav-links {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.app-nav a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
 .admin-tab-button {
   display: inline-flex;
   align-items: center;
@@ -225,6 +247,12 @@
   gap: 0.4rem;
   margin: 0.5rem 0 0;
   font-size: 0.95rem;
+}
+
+.access-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .chip-cell {

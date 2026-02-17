@@ -5,6 +5,7 @@ import type {
   CompletePasswordResetInput,
   LoginInput,
   PreSignupInput,
+  RequestPasswordResetInput,
   ValidatePreSignupInput,
   ValidatePreSignupResult,
   ValidatePasswordChangeInput,
@@ -48,6 +49,12 @@ export class HttpAuthRepository implements AuthRepository {
       },
       input.token,
     );
+  }
+
+  async requestPasswordReset(input: RequestPasswordResetInput): Promise<void> {
+    await this.httpClient.post("/auth/password-reset-request", {
+      email: input.email,
+    });
   }
 
   async validatePasswordChange(

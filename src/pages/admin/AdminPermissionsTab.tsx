@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DataGrid,
+  GridActionsCellItem,
   type GridColDef,
   type GridRenderCellParams,
 } from "@mui/x-data-grid";
@@ -12,7 +13,13 @@ import type {
 import type { AdminApi } from "../../services/adminApi";
 import { CreateEditPermissionModal } from "../../components/admin/CreateEditPermissionModal";
 
-export const AdminPermissionsTab = ({ api }: { api: AdminApi }) => {
+export const AdminPermissionsTab = ({
+  api,
+  canWritePermissions,
+}: {
+  api: AdminApi;
+  canWritePermissions: boolean;
+}) => {
   const [permissions, setPermissions] = useState<AdminPermissionResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
@@ -102,44 +109,47 @@ export const AdminPermissionsTab = ({ api }: { api: AdminApi }) => {
       { field: "action", headerName: "Action", flex: 1, minWidth: 200 },
       {
         field: "actions",
+        type: "actions",
         headerName: "Ações",
-        sortable: false,
-        filterable: false,
-        width: 220,
-        renderCell: (params: GridRenderCellParams<AdminPermissionResponse>) => (
-          <div className="admin-actions">
-            <button
+        width: canWritePermissions ? 160 : 90,
+        getActions: (params: GridRenderCellParams<AdminPermissionResponse>) => {
+          const base = [
+            <GridActionsCellItem
+              key="detail"
+              icon={<FiEye />}
+              label="Detalhar"
               onClick={() => setDetailPermission(params.row)}
-              disabled={actionLoading}
-              className="icon-button"
-            >
-              <FiEye aria-hidden />
-              Detalhar
-            </button>
-            <button
+            />,
+          ];
+
+          if (!canWritePermissions) {
+            return base;
+          }
+
+          return [
+            ...base,
+            <GridActionsCellItem
+              key="edit"
+              icon={<FiEdit2 />}
+              label="Editar"
               onClick={() => {
                 setEditingPermission(params.row);
                 setShowModal(true);
               }}
-              disabled={actionLoading}
-              className="icon-button"
-            >
-              <FiEdit2 aria-hidden />
-              Editar
-            </button>
-            <button
+              showInMenu
+            />,
+            <GridActionsCellItem
+              key="delete"
+              icon={<FiTrash2 />}
+              label="Excluir"
               onClick={() => handleDelete(params.row.id)}
-              disabled={actionLoading}
-              className="icon-button danger"
-            >
-              <FiTrash2 aria-hidden />
-              Excluir
-            </button>
-          </div>
-        ),
+              showInMenu
+            />,
+          ];
+        },
       },
     ],
-    [actionLoading, handleDelete],
+    [actionLoading, canWritePermissions, handleDelete],
   );
 
   return (
@@ -155,14 +165,16 @@ export const AdminPermissionsTab = ({ api }: { api: AdminApi }) => {
               setPage(0);
             }}
           />
-          <button
-            onClick={() => {
-              setEditingPermission(null);
-              setShowModal(true);
-            }}
-          >
-            Nova permissão
-          </button>
+          {canWritePermissions && (
+            <button
+              onClick={() => {
+                setEditingPermission(null);
+                setShowModal(true);
+              }}
+            >
+              Nova permissão
+            </button>
+          )}
         </div>
       </header>
 
