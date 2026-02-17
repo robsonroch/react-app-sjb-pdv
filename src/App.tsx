@@ -1,5 +1,12 @@
 import { Link, Route, Routes } from "react-router-dom";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Slider,
+  Typography,
+} from "@mui/material";
 import "./App.css";
 import { ProtectedRoute } from "./adapters/primary/react/auth/ProtectedRoute";
 import { LoginPage } from "./adapters/primary/react/auth/pages/LoginPage";
@@ -11,8 +18,8 @@ import { PasswordResetPage } from "./adapters/primary/react/auth/pages/PasswordR
 import { AdminRoute } from "./adapters/primary/react/auth/AdminRoute";
 import { useAuth } from "./adapters/primary/react/auth/useAuth";
 import { AdminPage } from "./pages/admin/AdminPage";
-import { THEME_OPTIONS, type ThemeName } from "./theme/themes";
-import { useThemeController } from "./theme/themeContext";
+import { themeOptions, type ThemeName } from "./theme/themes";
+import { useTheme } from "./theme/ThemeContext";
 
 const Home = () => {
   const { user, logout, hasPermission } = useAuth();
@@ -88,25 +95,38 @@ const SalesReport = () => (
 );
 
 const ThemeSwitcher = () => {
-  const { themeName, setThemeName } = useThemeController();
+  const { themeName, setThemeName, panelOpacity, setPanelOpacity } = useTheme();
 
   return (
     <div className="app-toolbar">
-      <FormControl size="small">
-        <InputLabel id="theme-select-label">Tema</InputLabel>
-        <Select
-          labelId="theme-select-label"
-          value={themeName}
-          label="Tema"
-          onChange={(event) => setThemeName(event.target.value as ThemeName)}
-        >
-          {THEME_OPTIONS.map((option) => (
-            <MenuItem key={option.id} value={option.id}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <div className="theme-controls glass-panel">
+        <FormControl size="small" className="theme-control">
+          <InputLabel id="theme-select-label">Tema</InputLabel>
+          <Select
+            labelId="theme-select-label"
+            value={themeName}
+            label="Tema"
+            onChange={(event) => setThemeName(event.target.value as ThemeName)}
+          >
+            {themeOptions.map((option) => (
+              <MenuItem key={option.id} value={option.id}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <div className="theme-control theme-slider">
+          <Typography variant="caption">Suavização</Typography>
+          <Slider
+            min={0}
+            max={0.95}
+            step={0.05}
+            value={panelOpacity}
+            onChange={(_, value) => setPanelOpacity(value as number)}
+            valueLabelDisplay="auto"
+          />
+        </div>
+      </div>
     </div>
   );
 };

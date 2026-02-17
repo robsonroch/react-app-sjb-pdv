@@ -1,0 +1,158 @@
+:root {
+  --theme-background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+  --theme-overlay: rgba(248, 250, 252, 0.75);
+  --theme-blur: 8px;
+  --theme-panel-opacity: 0.85;
+  --theme-text-color: #1f2937;
+  --theme-panel-rgb: 255 255 255;
+  --theme-overlay-rgb: 248 250 252;
+  --theme-bg-attachment: scroll;
+  --theme-transition: 300ms ease;
+}
+
+html,
+body {
+  color: var(--theme-text-color);
+  transition:
+    color var(--theme-transition),
+    background var(--theme-transition);
+}
+
+.global-layout {
+  min-height: 100vh;
+  background-image: var(--theme-background);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: var(--theme-bg-attachment);
+  transition:
+    background-image var(--theme-transition),
+    background-color var(--theme-transition);
+}
+
+.global-content {
+  position: relative;
+  z-index: 0;
+}
+
+.glass-panel,
+.glass-grid,
+.glass-form,
+.alert-box {
+  background: rgba(var(--theme-panel-rgb) / var(--theme-panel-opacity));
+  backdrop-filter: blur(var(--theme-blur));
+  -webkit-backdrop-filter: blur(var(--theme-blur));
+  border: 1px solid rgba(var(--theme-panel-rgb) / 0.12);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  transition:
+    background var(--theme-transition),
+    box-shadow var(--theme-transition),
+    border-color var(--theme-transition);
+}
+
+.glass-grid {
+  border-radius: 12px;
+}
+
+.alert-box {
+  border-left: 4px solid rgba(var(--theme-panel-rgb) / 0.4);
+}
+
+/* Auto-apply glass styles to existing components */
+:where(.auth-card, .admin-layout, .modal, .admin-datagrid) {
+  background: rgba(var(--theme-panel-rgb) / var(--theme-panel-opacity));
+  backdrop-filter: blur(var(--theme-blur));
+  -webkit-backdrop-filter: blur(var(--theme-blur));
+  border: 1px solid rgba(var(--theme-panel-rgb) / 0.12);
+}
+
+:root[data-panel-opacity="0"]
+  :where(.auth-card, .admin-layout, .modal, .admin-datagrid),
+:root[data-panel-opacity="0"] .glass-panel,
+:root[data-panel-opacity="0"] .glass-grid,
+:root[data-panel-opacity="0"] .glass-form,
+:root[data-panel-opacity="0"] .alert-box {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+:where(.auth-error, .auth-success) {
+  background: rgba(var(--theme-panel-rgb) / 0.75);
+  border: 1px solid rgba(var(--theme-panel-rgb) / 0.2);
+}
+
+:where(.admin-datagrid) {
+  overflow: hidden;
+}
+
+:where(.admin-datagrid .MuiDataGrid-root) {
+  border: none;
+  color: var(--theme-text-color);
+}
+
+:where(.admin-datagrid .MuiDataGrid-columnHeaders) {
+  background: rgba(var(--theme-panel-rgb) / 0.9);
+  border-bottom: 1px solid rgba(var(--theme-panel-rgb) / 0.2);
+}
+
+:where(.admin-datagrid .MuiDataGrid-cell) {
+  border-bottom: 1px solid rgba(var(--theme-panel-rgb) / 0.1);
+}
+
+:where(.admin-datagrid .MuiDataGrid-row:hover) {
+  background: rgba(var(--theme-panel-rgb) / 0.08);
+}
+
+:where(.admin-datagrid .MuiDataGrid-footerContainer) {
+  border-top: 1px solid rgba(var(--theme-panel-rgb) / 0.2);
+}
+
+/* Ensure readability in dark themes */
+:root[data-theme="noite"] :where(.auth-card, .admin-layout, .modal) {
+  color: var(--theme-text-color);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="noite"] :where(.admin-datagrid) {
+  background: rgba(15 23 42 / 0.75);
+}
+
+:root[data-theme="noite"] :where(.admin-datagrid .MuiDataGrid-columnHeaders) {
+  background: rgba(2 6 23 / 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="noite"] :where(.admin-datagrid .MuiDataGrid-cell) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="noite"] :where(.auth-card input, .admin-filters input) {
+  background: rgba(15, 23, 42, 0.65);
+  color: var(--theme-text-color);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="noite"] :where(.icon-button, .admin-tab-button) {
+  background: rgba(15, 23, 42, 0.65);
+  color: var(--theme-text-color);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="noite"] :where(.icon-button:hover) {
+  border-color: rgba(96, 165, 250, 0.6);
+  color: #93c5fd;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .global-layout,
+  .glass-panel,
+  .glass-grid,
+  .glass-form,
+  .alert-box,
+  :where(.auth-card, .admin-layout, .modal, .admin-datagrid) {
+    transition: none;
+  }
+}
